@@ -21,29 +21,59 @@ async function searchYouTube(query) {
 }
 
 function displayResults(results) {
+  const searchResults = document.getElementById('search-results');
   searchResults.innerHTML = "";
 
   results.forEach((result) => {
     const videoId = result.id.videoId;
     const title = result.snippet.title;
     const thumbnail = result.snippet.thumbnails.medium.url;
-    const url = `https://www.youtube.com/watch?v=${videoId}`;
 
     const resultItem = document.createElement("div");
     resultItem.className = "result-item";
     resultItem.innerHTML = `
-      <a href="${url}" target="_blank" rel="noopener">
-        <img src="${thumbnail}" alt="${title}" class="video-thumbnail">
-      </a>
-      <h3 class="result-title">
-        <a href="${url}" target="_blank" rel="noopener">${title}</a>
-      </h3>
+      <div class="thumbnail-container">
+        <img src="${thumbnail}" alt="${title}" />
+      </div>
+      <h3 class="result-title">${title}</h3>
     `;
+
+    resultItem.addEventListener('click', () => {
+      const mainVideo = document.getElementById('main-video');
+      const currentVideoSrc = mainVideo.src;
+
+      // Store the current video in the history container
+      if (currentVideoSrc) {
+        const historyContainer = document.getElementById('video-history');
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+          <iframe width="200" height="113" src="${currentVideoSrc}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        `;
+        historyContainer.appendChild(historyItem);
+      }
+
+      // Update the main video with the selected video
+      mainVideo.src = `https://www.youtube.com/embed/${videoId}`;
+    });
 
     searchResults.appendChild(resultItem);
   });
 }
 
+document.getElementById('search-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = document.getElementById('search-input').value;
+  const results = await searchYouTube(query);
+  displayResults(results);
+});
+
+document.getElementById('search-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = document.getElementById('search-input').value;
+  const results = await searchYouTube(query);
+  displayResults(results);
+});
 document.addEventListener("DOMContentLoaded", () => {
   const contentTypesInput = prompt("Please enter the types of content you are interested in (separated by commas):");
   const contentTypes = contentTypesInput ? contentTypesInput.split(',').map(type => type.trim().toLowerCase()) : [];
